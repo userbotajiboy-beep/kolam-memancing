@@ -126,6 +126,7 @@
       url('tes.jpg') center/cover no-repeat fixed;
     background-size: 400% 400%, cover;
     animation: gradientShift 15s ease infinite;
+    min-width: 1280px;
   }
 
   @keyframes gradientShift {
@@ -161,7 +162,7 @@
 
 <!-- SLIDE 1: Leaderboard + Music Player -->
 <div id="slide1" class="slide active h-screen p-5">
-  <div class="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-5 h-full">
+  <div class="grid grid-cols-[2.5fr_1fr] gap-5 h-full">
 
     <!-- LEADERBOARD -->
     <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-10 border border-purple-500/30 shadow-2xl">
