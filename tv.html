@@ -40,53 +40,6 @@
   }
 </script>
 <style>
-  /* Shining effect for top 3 - optimized */
-  @keyframes shine {
-    0%, 100% { background-position: -100% center; }
-    50% { background-position: 100% center; }
-  }
-
-  .shine-gold {
-    background: linear-gradient(
-      90deg,
-      rgba(251, 191, 36, 0.3) 0%,
-      rgba(251, 191, 36, 0.8) 50%,
-      rgba(251, 191, 36, 0.3) 100%
-    );
-    background-size: 200% auto;
-    animation: shine 4s ease-in-out infinite;
-    border: 2px solid #fbbf24;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
-  }
-
-  .shine-silver {
-    background: linear-gradient(
-      90deg,
-      rgba(203, 213, 225, 0.3) 0%,
-      rgba(203, 213, 225, 0.8) 50%,
-      rgba(203, 213, 225, 0.3) 100%
-    );
-    background-size: 200% auto;
-    animation: shine 4s ease-in-out infinite;
-    animation-delay: 0.5s;
-    border: 2px solid #cbd5e1;
-    box-shadow: 0 0 20px rgba(203, 213, 225, 0.4);
-  }
-
-  .shine-bronze {
-    background: linear-gradient(
-      90deg,
-      rgba(217, 119, 6, 0.3) 0%,
-      rgba(217, 119, 6, 0.8) 50%,
-      rgba(217, 119, 6, 0.3) 100%
-    );
-    background-size: 200% auto;
-    animation: shine 4s ease-in-out infinite;
-    animation-delay: 1s;
-    border: 2px solid #d97706;
-    box-shadow: 0 0 20px rgba(217, 119, 6, 0.4);
-  }
-
   /* Gradient background with image overlay - optimized */
   body {
     background: 
@@ -482,15 +435,15 @@
       document.getElementById('lastUpdate').textContent = `${dateStr} ${timeStr}`;
       
       const medals = ['🥇', '🥈', '🥉'];
-      const shineClasses = ['shine-gold', 'shine-silver', 'shine-bronze'];
+      const topColors = ['bg-yellow-500/30 border-yellow-500', 'bg-slate-300/30 border-slate-300', 'bg-orange-600/30 border-orange-600'];
       
       board.innerHTML = players.map((p, i) => {
         const isTopThree = i < 3;
-        const shineClass = isTopThree ? shineClasses[i] : 'bg-purple-900/20';
+        const bgClass = isTopThree ? topColors[i] : 'bg-purple-900/20 border-purple-500/30';
         const isLongName = p.name.length > 15;
         
         return `
-          <div class="${shineClass} p-6 rounded-2xl flex items-center gap-5 border-2 transition-all duration-300">
+          <div class="${bgClass} p-6 rounded-2xl flex items-center gap-5 border-2 transition-all duration-300">
             <div class="text-6xl min-w-[70px]">${medals[i] || '🎣'}</div>
             <div class="flex-1 ${isLongName ? 'scroll-container' : ''}">
               <div class="text-4xl font-bold mb-2 text-white drop-shadow-lg ${isLongName ? 'scroll-text' : ''}">${isLongName ? p.name + ' • ' + p.name : p.name}</div>
