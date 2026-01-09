@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TV Kolam Memancing</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Supabase Configuration v2
+  const SUPABASE_URL = 'https://wkefbuwkogqjwjhgozid.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrZWZidXdrb2dxandqaGdvemlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjcwODEsImV4cCI6MjA4MzUwMzA4MX0.D7Hy54X4GH5a-i62YgHQNx1nOEctYkR_MYlZijXZuEs';
+  
+  // Initialize Supabase client
+  var supabaseClient;
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.supabase && window.supabase.createClient) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('✅ Supabase initialized');
+    } else {
+      console.error('❌ Supabase library not loaded');
+    }
+  });
+</script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#a855f7',
+          secondary: '#fbbf24',
+          dark: '#1e1b4b',
+        }
+      }
+    }
+  }
+</script>
+<style>
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  .animate-slide-in {
+    animation: slideIn 0.5s ease forwards;
+  }
+  
+  .slide {
+    display: none;
+  }
+  
+  .slide.active {
+    display: block;
+  }
+  
+  .fade-transition {
+    animation: fadeIn 0.5s ease-in;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Shining effect for top 3 */
+  @keyframes shine {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  .shine-gold {
+    background: linear-gradient(
+      90deg,
+      rgba(251, 191, 36, 0.3) 0%,
+      rgba(251, 191, 36, 0.8) 50%,
+      rgba(251, 191, 36, 0.3) 100%
+    );
+    background-size: 200% auto;
+    animation: shine 3s linear infinite;
+    border: 2px solid #fbbf24;
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+  }
+
+  .shine-silver {
+    background: linear-gradient(
+      90deg,
+      rgba(203, 213, 225, 0.3) 0%,
+      rgba(203, 213, 225, 0.8) 50%,
+      rgba(203, 213, 225, 0.3) 100%
+    );
+    background-size: 200% auto;
+    animation: shine 3s linear infinite;
+    animation-delay: 0.5s;
+    border: 2px solid #cbd5e1;
+    box-shadow: 0 0 30px rgba(203, 213, 225, 0.5);
+  }
+
+  .shine-bronze {
+    background: linear-gradient(
+      90deg,
+      rgba(217, 119, 6, 0.3) 0%,
+      rgba(217, 119, 6, 0.8) 50%,
+      rgba(217, 119, 6, 0.3) 100%
+    );
+    background-size: 200% auto;
+    animation: shine 3s linear infinite;
+    animation-delay: 1s;
+    border: 2px solid #d97706;
+    box-shadow: 0 0 30px rgba(217, 119, 6, 0.5);
+  }
+
+  /* Gradient background */
+  body {
+    background: linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #1e1b4b 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+</style>
+</head>
+
+<body class="text-white overflow-hidden">
+
+<!-- SLIDE 1: Leaderboard + Music Player -->
+<div id="slide1" class="slide active h-screen p-5">
+  <div class="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-5 h-full">
+
+    <!-- LEADERBOARD -->
+    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-10 border border-purple-500/30 shadow-2xl">
+      <h1 class="text-6xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent mb-8">
+        🏆 LEADERBOARD
+      </h1>
+      <div id="leaderboard" class="flex flex-col gap-4">
+        <div class="text-center py-10 opacity-60">Memuat data...</div>
+      </div>
+    </div>
+
+    <!-- MUSIC PLAYER -->
+    <div class="flex flex-col gap-5">
+      <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-6 border border-purple-500/30 shadow-2xl">
+        <h3 class="text-xl font-semibold text-yellow-400 mb-4">🎵 NOW PLAYING</h3>
+        
+        <button 
+          id="startBtn" 
+          onclick="startPlayer()"
+          class="w-full bg-gradient-to-r from-primary to-cyan-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-primary/50 hover:-translate-y-0.5 transition-all duration-300 mb-4">
+          ▶️ START MUSIC
+        </button>
+        
+        <div id="player" class="rounded-2xl overflow-hidden shadow-xl"></div>
+        
+        <p class="text-xs text-center opacity-50 mt-3">Lagu dikawal oleh Admin</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SLIDE 2: Fullscreen Music Player -->
+<div id="slide2" class="slide h-screen p-5">
+  <div class="h-full flex flex-col items-center justify-center">
+    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-10 border border-purple-500/30 shadow-2xl max-w-6xl w-full">
+      <h1 class="text-5xl font-bold text-center bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent mb-8">
+        🎵 NOW PLAYING
+      </h1>
+      <div id="playerFullscreen" class="rounded-2xl overflow-hidden shadow-2xl" style="height: 600px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Load YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+  let player;
+  let playerFullscreen;
+  let currentVideo = "";
+  let isPlayerReady = false;
+  let hasStarted = false;
+  let currentSlide = 1;
+  let slideInterval;
+
+  // Slideshow rotation
+  function startSlideshow() {
+    slideInterval = setInterval(() => {
+      currentSlide = currentSlide === 1 ? 2 : 1;
+      showSlide(currentSlide);
+    }, 30000); // 30 seconds per slide
+  }
+
+  function showSlide(slideNum) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    const slide = document.getElementById('slide' + slideNum);
+    slide.classList.add('active');
+    slide.classList.add('fade-transition');
+    
+    // Mute/unmute players based on active slide
+    if (slideNum === 1) {
+      // Slide 1 active - unmute small player, mute fullscreen
+      if (player) {
+        player.unMute();
+        player.setVolume(100);
+        // Resume if paused
+        if (hasStarted && player.getPlayerState() !== 1) {
+          player.playVideo();
+        }
+      }
+      if (playerFullscreen) {
+        playerFullscreen.mute();
+        // Keep playing but muted (for smooth transition)
+      }
+    } else {
+      // Slide 2 active - unmute fullscreen, mute small player
+      if (player) {
+        player.mute();
+        // Keep playing but muted (for smooth transition)
+      }
+      if (playerFullscreen) {
+        playerFullscreen.unMute();
+        playerFullscreen.setVolume(100);
+        // Resume if paused
+        if (hasStarted && playerFullscreen.getPlayerState() !== 1) {
+          playerFullscreen.playVideo();
+        }
+      }
+    }
+    
+    console.log('📺 Showing slide ' + slideNum);
+  }
+
+  function startPlayer() {
+    if (player && isPlayerReady) {
+      player.unMute();
+      player.playVideo();
+      
+      // Mute fullscreen player initially (will unmute when slide 2 shows)
+      if (playerFullscreen) {
+        playerFullscreen.mute();
+      }
+      
+      document.getElementById('startBtn').classList.add('hidden');
+      hasStarted = true;
+      
+      // Start slideshow after user interaction
+      startSlideshow();
+      
+      console.log("🎬 Player started with audio!");
+    }
+  }
+
+  // YouTube API ready callback
+  function onYouTubeIframeAPIReady() {
+    console.log('🎬 YouTube API ready, waiting for Supabase...');
+    
+    // Wait for Supabase to be ready
+    function initPlayers() {
+      if (!supabaseClient) {
+        setTimeout(initPlayers, 500);
+        return;
+      }
+      
+      console.log('🎬 Initializing players...');
+      
+      // Load initial music control from Supabase
+      supabaseClient
+        .from('music_control')
+        .select('*')
+        .eq('id', 1)
+        .single()
+        .then(({ data, error }) => {
+          if (error) {
+            console.error('Error loading music control:', error);
+            // Use defaults if error
+            createPlayers(false, 'jNQXAC9IVRw', null);
+            return;
+          }
+
+          const playlistMode = data?.playlist_mode || false;
+          const initialVideo = data?.video_id || "jNQXAC9IVRw";
+          const playlistId = data?.playlist_id;
+          
+          createPlayers(playlistMode, initialVideo, playlistId);
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          createPlayers(false, 'jNQXAC9IVRw', null);
+        });
+    }
+    
+    initPlayers();
+  }
+
+  function createPlayers(playlistMode, initialVideo, playlistId) {
+    const playerConfig = {
+      height: '240',
+      width: '100%',
+      playerVars: {
+        'autoplay': 0,
+        'controls': 1,
+        'rel': 0,
+        'modestbranding': 1,
+        'fs': 1,
+        'mute': 0
+      },
+      events: {
+        'onReady': onPlayerReady,
+        'onError': onPlayerError,
+        'onStateChange': onPlayerStateChange
+      }
+    };
+
+    const playerConfigFullscreen = {
+      height: '600',
+      width: '100%',
+      playerVars: {
+        'autoplay': 0,
+        'controls': 1,
+        'rel': 0,
+        'modestbranding': 1,
+        'fs': 1,
+        'mute': 0
+      },
+      events: {
+        'onReady': onPlayerFullscreenReady,
+        'onError': onPlayerError,
+        'onStateChange': onPlayerStateChange
+      }
+    };
+
+    // Load playlist or single video
+    if (playlistMode && playlistId) {
+      playerConfig.playerVars.listType = 'playlist';
+      playerConfig.playerVars.list = playlistId;
+      playerConfigFullscreen.playerVars.listType = 'playlist';
+      playerConfigFullscreen.playerVars.list = playlistId;
+      console.log("🎵 Loading playlist: " + playlistId);
+    } else {
+      playerConfig.videoId = initialVideo;
+      playerConfigFullscreen.videoId = initialVideo;
+      currentVideo = initialVideo;
+      console.log("🎵 Loading video: " + initialVideo);
+    }
+    
+    player = new YT.Player('player', playerConfig);
+    playerFullscreen = new YT.Player('playerFullscreen', playerConfigFullscreen);
+  }
+
+  function onPlayerReady(event) {
+    isPlayerReady = true;
+    console.log("✅ Player ready!");
+  }
+
+  function onPlayerFullscreenReady(event) {
+    console.log("✅ Fullscreen player ready!");
+  }
+
+  function onPlayerError(event) {
+    console.error("❌ Player error:", event.data);
+  }
+
+  function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED && hasStarted) {
+      console.log("🔄 Video ended, playing next...");
+    }
+    
+    // Sync video position when playing (but don't sync playback state)
+    if (event.data === YT.PlayerState.PLAYING && currentSlide === 1) {
+      syncPlayerPosition();
+    }
+  }
+
+  function syncPlayerPosition() {
+    if (!player || !playerFullscreen) return;
+    
+    try {
+      const currentTime = player.getCurrentTime();
+      const videoId = player.getVideoData().video_id;
+      const fullscreenVideoId = playerFullscreen.getVideoData().video_id;
+      
+      // Only sync if different video
+      if (fullscreenVideoId !== videoId) {
+        playerFullscreen.loadVideoById(videoId, currentTime);
+        playerFullscreen.pauseVideo(); // Keep paused until slide 2
+      } else {
+        // Just sync time
+        playerFullscreen.seekTo(currentTime, true);
+      }
+    } catch(e) {
+      // Ignore sync errors
+    }
+  }
+
+  // Check for video updates from Supabase (real-time)
+  let lastMusicUpdate = null;
+  let musicSubscription = null;
+  
+  // Initialize realtime subscription after Supabase is ready
+  function initRealtimeSubscription() {
+    if (!supabaseClient) {
+      console.log('⏳ Waiting for Supabase...');
+      setTimeout(initRealtimeSubscription, 500);
+      return;
+    }
+
+    // Subscribe to real-time changes
+    musicSubscription = supabaseClient
+      .channel('music_control_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'music_control' },
+        (payload) => {
+          console.log('🔔 Music control updated:', payload);
+          handleMusicUpdate(payload.new);
+        }
+      )
+      .subscribe();
+    
+    console.log('✅ Realtime subscription active');
+  }
+
+  // Start subscription when page loads
+  window.addEventListener('load', () => {
+    setTimeout(initRealtimeSubscription, 1000);
+  });
+
+  // Poll for updates (fallback if realtime doesn't work)
+  setInterval(async () => {
+    try {
+      const { data, error } = await supabaseClient
+        .from('music_control')
+        .select('*')
+        .eq('id', 1)
+        .single();
+
+      if (error) throw error;
+      if (data) handleMusicUpdate(data);
+    } catch (err) {
+      console.error('Error fetching music control:', err);
+    }
+  }, 2000);
+
+  async function handleMusicUpdate(data) {
+    if (!data || !isPlayerReady || !player) return;
+
+    // Handle commands
+    if (data.command && data.updated_at !== lastMusicUpdate) {
+      console.log("📥 Received command: " + data.command);
+      
+      switch(data.command) {
+        case 'play':
+          if (currentSlide === 1) {
+            player.playVideo();
+          } else {
+            playerFullscreen.playVideo();
+          }
+          break;
+        case 'pause':
+          if (currentSlide === 1) {
+            player.pauseVideo();
+          } else {
+            playerFullscreen.pauseVideo();
+          }
+          break;
+        case 'next':
+          if (currentSlide === 1) {
+            player.nextVideo();
+          } else {
+            playerFullscreen.nextVideo();
+          }
+          break;
+        case 'previous':
+          if (currentSlide === 1) {
+            player.previousVideo();
+          } else {
+            playerFullscreen.previousVideo();
+          }
+          break;
+      }
+    }
+
+    // Handle video/playlist changes
+    if (data.updated_at !== lastMusicUpdate) {
+      lastMusicUpdate = data.updated_at;
+      
+      if (data.playlist_mode && data.playlist_id) {
+        console.log("🔄 Loading playlist: " + data.playlist_id);
+        
+        if (currentSlide === 1) {
+          player.loadPlaylist({
+            listType: 'playlist',
+            list: data.playlist_id,
+            index: 0
+          });
+          
+          if (hasStarted) {
+            setTimeout(() => player.playVideo(), 500);
+          }
+        } else {
+          playerFullscreen.loadPlaylist({
+            listType: 'playlist',
+            list: data.playlist_id,
+            index: 0
+          });
+          
+          if (hasStarted) {
+            setTimeout(() => playerFullscreen.playVideo(), 500);
+          }
+        }
+        
+        // Sync the other player
+        if (playerFullscreen && currentSlide === 1) {
+          playerFullscreen.loadPlaylist({
+            listType: 'playlist',
+            list: data.playlist_id,
+            index: 0
+          });
+          playerFullscreen.pauseVideo();
+        } else if (player && currentSlide === 2) {
+          player.loadPlaylist({
+            listType: 'playlist',
+            list: data.playlist_id,
+            index: 0
+          });
+          player.pauseVideo();
+        }
+      } else if (!data.playlist_mode && data.video_id && data.video_id !== currentVideo) {
+        console.log("🔄 Loading video: " + data.video_id);
+        currentVideo = data.video_id;
+        
+        if (currentSlide === 1) {
+          player.loadVideoById(data.video_id);
+          if (hasStarted) {
+            setTimeout(() => player.playVideo(), 500);
+          }
+        } else {
+          playerFullscreen.loadVideoById(data.video_id);
+          if (hasStarted) {
+            setTimeout(() => playerFullscreen.playVideo(), 500);
+          }
+        }
+        
+        // Sync the other player
+        if (playerFullscreen && currentSlide === 1) {
+          playerFullscreen.loadVideoById(data.video_id);
+          playerFullscreen.pauseVideo();
+        } else if (player && currentSlide === 2) {
+          player.loadVideoById(data.video_id);
+          player.pauseVideo();
+        }
+      }
+    }
+  }
+
+  // Load leaderboard
+  async function loadLeaderboard() {
+    try {
+      if (!supabaseClient) {
+        console.error('❌ Supabase client not ready');
+        return;
+      }
+
+      const { data: players, error } = await supabaseClient
+        .from('players')
+        .select('*')
+        .order('weight', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      const board = document.getElementById('leaderboard');
+      
+      if (!players || players.length === 0) {
+        board.innerHTML = '<div class="text-center py-10 opacity-60">Tiada data lagi. Tambah pemain dari Admin Panel.</div>';
+        return;
+      }
+      
+      console.log('✅ Loaded ' + players.length + ' players');
+      
+      const medals = ['🥇', '🥈', '🥉'];
+      const shineClasses = ['shine-gold', 'shine-silver', 'shine-bronze'];
+      
+      board.innerHTML = players.map((p, i) => {
+        const isTopThree = i < 3;
+        const shineClass = isTopThree ? shineClasses[i] : 'bg-purple-900/20';
+        
+        return `
+          <div class="${shineClass} p-6 rounded-2xl flex items-center gap-5 border-2 hover:scale-105 transition-all duration-300" style="animation: slideIn 0.5s ease ${i * 0.1}s forwards; opacity: 0;">
+            <div class="text-6xl min-w-[70px]">${medals[i] || '🎣'}</div>
+            <div class="flex-1">
+              <div class="text-4xl font-bold mb-2 text-white drop-shadow-lg">${p.name}</div>
+              <div class="text-3xl font-bold text-yellow-300 drop-shadow-lg">${p.weight} kg</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('Error loading leaderboard:', err);
+      const board = document.getElementById('leaderboard');
+      board.innerHTML = '<div class="text-center py-10 text-red-400">Error: ' + err.message + '</div>';
+    }
+  }
+
+  // Load leaderboard on start and refresh every 5 seconds
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (supabaseClient) {
+        loadLeaderboard();
+        setInterval(loadLeaderboard, 5000);
+      } else {
+        console.error('❌ Supabase not initialized');
+      }
+    }, 500);
+  });
+
+  console.log("📺 TV Page loaded");
+  console.log("🔗 Connected to Supabase");
+</script>
+
+</body>
+</html>

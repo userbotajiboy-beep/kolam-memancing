@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test Supabase Connection</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body style="background: #1e1b4b; color: white; padding: 40px; font-family: Arial;">
+
+<h1>🔧 Supabase Connection Test</h1>
+<div id="status">Testing...</div>
+<div id="results" style="margin-top: 20px;"></div>
+
+<script>
+const SUPABASE_URL = 'https://wkefbuwkogqjwjhgozid.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrZWZidXdrb2dxandqaGdvemlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjcwODEsImV4cCI6MjA4MzUwMzA4MX0.D7Hy54X4GH5a-i62YgHQNx1nOEctYkR_MYlZijXZuEs';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function testConnection() {
+  const results = document.getElementById('results');
+  const status = document.getElementById('status');
+  
+  try {
+    // Test 1: Check players table
+    status.innerHTML = '✅ Connected to Supabase<br>Testing players table...';
+    
+    const { data: players, error: playersError } = await supabase
+      .from('players')
+      .select('*')
+      .limit(5);
+    
+    if (playersError) {
+      results.innerHTML += `<div style="color: #ff4757; margin: 10px 0;">
+        ❌ Players table error: ${playersError.message}
+        <br><br>
+        <strong>Fix:</strong> Run this SQL in Supabase SQL Editor:
+        <pre style="background: #000; padding: 10px; border-radius: 5px; overflow-x: auto;">
+CREATE TABLE players (
+  id BIGSERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  weight DECIMAL(5,2) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE players ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all on players" ON players 
+  FOR ALL USING (true) WITH CHECK (true);
+        </pre>
+      </div>`;
+    } else {
+      results.innerHTML += `<div style="color: #2ecc71; margin: 10px 0;">
+        ✅ Players table OK (${players.length} rows)
+      </div>`;
+      
+      if (players.length > 0) {
+        results.innerHTML += `<pre style="background: #000; padding: 10px; border-radius: 5px;">${JSON.stringify(players, null, 2)}</pre>`;
+      }
+    }
+    
+    // Test 2: Check music_control table
+    status.innerHTML = '✅ Connected to Supabase<br>Testing music_control table...';
+    
+    const { data: music, error: musicError } = await supabase
+      .from('music_control')
+      .select('*')
+      .eq('id', 1)
+      .single();
+    
+    if (musicError) {
+      results.innerHTML += `<div style="color: #ff4757; margin: 10px 0;">
+        ❌ Music control table error: ${musicError.message}
+        <br><br>
+        <strong>Fix:</strong> Run this SQL in Supabase SQL Editor:
+        <pre style="background: #000; padding: 10px; border-radius: 5px; overflow-x: auto;">
+CREATE TABLE music_control (
+  id BIGSERIAL PRIMARY KEY,
+  video_id TEXT,
+  playlist_id TEXT,
+  playlist_mode BOOLEAN DEFAULT false,
+  command TEXT,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+INSERT INTO music_control (id, video_id) VALUES (1, 'jNQXAC9IVRw');
+
+ALTER TABLE music_control ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all on music_control" ON music_control 
+  FOR ALL USING (true) WITH CHECK (true);
+        </pre>
+      </div>`;
+    } else {
+      results.innerHTML += `<div style="color: #2ecc71; margin: 10px 0;">
+        ✅ Music control table OK
+      </div>`;
+      results.innerHTML += `<pre style="background: #000; padding: 10px; border-radius: 5px;">${JSON.stringify(music, null, 2)}</pre>`;
+    }
+    
+    status.innerHTML = '✅ All tests complete!';
+    
+  } catch (err) {
+    status.innerHTML = '❌ Connection failed';
+    results.innerHTML = `<div style="color: #ff4757;">Error: ${err.message}</div>`;
+  }
+}
+
+testConnection();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,36 @@
+# Python
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+server.py
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+leaderboard.db
+
+# Environment
+.env
+.env.local
+config.js
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Temporary
+current.txt
+*.tmp

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Kolam Memancing</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Supabase Configuration v2
+  const SUPABASE_URL = 'https://wkefbuwkogqjwjhgozid.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrZWZidXdrb2dxandqaGdvemlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5MjcwODEsImV4cCI6MjA4MzUwMzA4MX0.D7Hy54X4GH5a-i62YgHQNx1nOEctYkR_MYlZijXZuEs';
+  
+  // Initialize Supabase client
+  var supabaseClient;
+  
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.supabase && window.supabase.createClient) {
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('✅ Supabase initialized');
+    } else {
+      console.error('❌ Supabase library not loaded');
+    }
+  });
+</script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: '#00d9ff',
+          dark: '#0a1929',
+        }
+      }
+    }
+  }
+</script>
+</head>
+
+<body class="bg-gradient-to-br from-[#0a1929] to-[#1a2332] text-white min-h-screen p-5">
+
+<div class="max-w-7xl mx-auto">
+  
+  <h1 class="text-5xl font-bold bg-gradient-to-r from-primary to-cyan-400 bg-clip-text text-transparent mb-8">
+    ⚙️ ADMIN PANEL
+  </h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    
+    <!-- Add Player Panel -->
+    <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-7 border border-white/10 shadow-2xl">
+      <h2 class="text-2xl font-semibold text-primary mb-5">➕ Tambah Pemenang</h2>
+      
+      <input 
+        id="playerName" 
+        type="text" 
+        placeholder="Nama pemain"
+        class="w-full px-5 py-3.5 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:bg-white/10 transition-all mb-3">
+      
+      <input 
+        id="playerWeight" 
+        type="number" 
+        step="0.1" 
+        placeholder="Berat (kg)"
+        class="w-full px-5 py-3.5 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:bg-white/10 transition-all mb-3">
+      
+      <button 
+        onclick="addPlayer()"
+        class="w-full bg-gradient-to-r from-primary to-cyan-600 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+        TAMBAH
+      </button>
+      
+      <p class="text-xs opacity-60 mt-3 leading-relaxed">
+        Masukkan nama dan berat tangkapan untuk tambah ke leaderboard
+      </p>
+    </div>
+
+    <!-- Music Control Panel -->
+    <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-7 border border-white/10 shadow-2xl">
+      <h2 class="text-2xl font-semibold text-primary mb-5">🎵 Kawalan Muzik</h2>
+      
+      <!-- Now Playing Preview -->
+      <div id="nowPlayingPreview" class="mb-4 p-4 bg-white/5 rounded-xl border border-white/10">
+        <div class="text-sm opacity-60 mb-2">Now Playing:</div>
+        <div id="currentVideoInfo" class="text-base font-semibold">Loading...</div>
+      </div>
+      
+      <div class="mb-4">
+        <label class="block mb-2 text-sm opacity-80">Single Video</label>
+        <input 
+          id="ytlink" 
+          type="text" 
+          placeholder="https://www.youtube.com/watch?v=XXXX"
+          class="w-full px-5 py-3.5 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:bg-white/10 transition-all mb-3">
+        
+        <button 
+          onclick="playMusic()"
+          class="w-full bg-gradient-to-r from-primary to-cyan-600 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+          ▶ PLAY VIDEO
+        </button>
+      </div>
+
+      <div class="border-t border-white/10 pt-4 mb-4">
+        <label class="block mb-2 text-sm opacity-80">Playlist</label>
+        <input 
+          id="playlistLink" 
+          type="text" 
+          placeholder="https://www.youtube.com/playlist?list=XXXX"
+          class="w-full px-5 py-3.5 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:bg-white/10 transition-all mb-3">
+        
+        <button 
+          onclick="playPlaylist()"
+          class="w-full bg-gradient-to-r from-primary to-cyan-600 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
+          ▶ PLAY PLAYLIST
+        </button>
+      </div>
+
+      <!-- Playlist Controls -->
+      <div class="border-t border-white/10 pt-4">
+        <label class="block mb-3 text-sm opacity-80">Kawalan Playback</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            onclick="sendCommand('previous')"
+            class="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all">
+            ⏮️ Previous
+          </button>
+          <button 
+            onclick="sendCommand('next')"
+            class="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all">
+            ⏭️ Next
+          </button>
+          <button 
+            onclick="sendCommand('pause')"
+            class="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all">
+            ⏸️ Pause
+          </button>
+          <button 
+            onclick="sendCommand('play')"
+            class="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-4 rounded-lg transition-all">
+            ▶️ Play
+          </button>
+        </div>
+      </div>
+
+      <p class="text-xs opacity-60 mt-3 leading-relaxed">
+        Paste link YouTube untuk control muzik di TV. Buka YouTube di tab lain untuk cari lagu.
+      </p>
+    </div>
+
+    <!-- Current Leaderboard -->
+    <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-7 border border-white/10 shadow-2xl lg:col-span-2">
+      <h2 class="text-2xl font-semibold text-primary mb-5">🏆 Leaderboard Semasa</h2>
+      
+      <div id="leaderboardList" class="max-h-96 overflow-y-auto mb-4 space-y-3 scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-white/5">
+        <div class="text-center py-10 opacity-50">
+          Memuat data...
+        </div>
+      </div>
+      
+      <button 
+        onclick="clearAll()"
+        class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-red-500/40 hover:-translate-y-0.5 transition-all duration-300">
+        🗑️ CLEAR SEMUA DATA
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Add player to leaderboard
+async function addPlayer() {
+  const name = document.getElementById('playerName').value.trim();
+  const weight = parseFloat(document.getElementById('playerWeight').value);
+
+  if (!name || !weight || weight <= 0) {
+    alert('Sila masukkan nama dan berat yang sah');
+    return;
+  }
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('players')
+      .insert([{ name, weight }]);
+
+    if (error) throw error;
+
+    alert('✅ Berjaya ditambah!');
+    document.getElementById('playerName').value = '';
+    document.getElementById('playerWeight').value = '';
+    loadLeaderboard();
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// Play music on TV
+async function playMusic() {
+  let link = document.getElementById('ytlink').value;
+  let videoId = '';
+
+  if (link.includes('v=')) {
+    videoId = link.split('v=')[1].substring(0, 11);
+  } else if (link.includes('youtu.be/')) {
+    videoId = link.split('youtu.be/')[1].substring(0, 11);
+  } else {
+    alert('Link YouTube tak sah');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('music_control')
+      .update({
+        video_id: videoId,
+        playlist_mode: false,
+        playlist_id: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    alert('🎵 Lagu ditukar! Video ID: ' + videoId);
+    document.getElementById('ytlink').value = '';
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// Play playlist on TV
+async function playPlaylist() {
+  let link = document.getElementById('playlistLink').value;
+  let playlistId = '';
+
+  if (link.includes('list=')) {
+    playlistId = link.split('list=')[1].split('&')[0];
+  } else {
+    alert('Link playlist tak sah');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('music_control')
+      .update({
+        playlist_id: playlistId,
+        playlist_mode: true,
+        video_id: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    alert('🎵 Playlist ditukar! Playlist ID: ' + playlistId);
+    document.getElementById('playlistLink').value = '';
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// Send playback command to TV
+async function sendCommand(command) {
+  try {
+    const { error } = await supabaseClient
+      .from('music_control')
+      .update({
+        command: command,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    console.log('📤 Command sent: ' + command);
+  } catch (err) {
+    console.error('Error sending command:', err);
+  }
+}
+
+// Load leaderboard
+async function loadLeaderboard() {
+  try {
+    const { data: players, error } = await supabaseClient
+      .from('players')
+      .select('*')
+      .order('weight', { ascending: false })
+      .limit(10);
+
+    if (error) throw error;
+
+    const list = document.getElementById('leaderboardList');
+    
+    if (!players || players.length === 0) {
+      list.innerHTML = '<div class="text-center py-10 opacity-50">Tiada data lagi</div>';
+      return;
+    }
+
+    const medals = ['🥇', '🥈', '🥉'];
+    list.innerHTML = players.map((p, i) => `
+      <div class="bg-white/5 p-4 rounded-xl flex items-center gap-4 border border-white/10 hover:bg-white/10 transition-all">
+        <div class="text-2xl">${medals[i] || '🎣'}</div>
+        <div class="flex-1">
+          <div class="text-lg font-semibold">${p.name}</div>
+          <div class="text-base text-primary font-bold">${p.weight} kg</div>
+        </div>
+        <button 
+          onclick="deletePlayer(${p.id})"
+          class="bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg text-sm hover:bg-red-500/30 transition-all">
+          Padam
+        </button>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Error loading leaderboard:', err);
+  }
+}
+
+// Delete player
+async function deletePlayer(id) {
+  if (!confirm('Padam pemain ini dari leaderboard?')) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from('players')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+
+    alert('✅ Berjaya dipadam!');
+    loadLeaderboard();
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// Clear all data
+async function clearAll() {
+  if (!confirm('⚠️ Padam SEMUA data leaderboard? Tindakan ini tidak boleh dibatalkan!')) return;
+
+  try {
+    const { error } = await supabaseClient
+      .from('players')
+      .delete()
+      .neq('id', 0); // Delete all rows
+
+    if (error) throw error;
+
+    alert('✅ Semua data telah dipadam!');
+    loadLeaderboard();
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// Load on start and refresh every 5 seconds
+window.addEventListener('load', () => {
+  // Wait a bit for Supabase to initialize
+  setTimeout(() => {
+    if (supabaseClient) {
+      loadLeaderboard();
+      loadCurrentMusic();
+      setInterval(loadLeaderboard, 5000);
+      setInterval(loadCurrentMusic, 3000);
+    } else {
+      console.error('❌ Supabase not initialized');
+      document.getElementById('leaderboardList').innerHTML = 
+        '<div class="text-center py-10 text-red-400">Error: Supabase not loaded. Refresh page.</div>';
+    }
+  }, 500);
+});
+
+// Load current music info
+async function loadCurrentMusic() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('music_control')
+      .select('*')
+      .eq('id', 1)
+      .single();
+
+    if (error) throw error;
+
+    const infoDiv = document.getElementById('currentVideoInfo');
+    
+    if (data.playlist_mode && data.playlist_id) {
+      infoDiv.innerHTML = `🎵 Playlist: ${data.playlist_id}`;
+    } else if (data.video_id) {
+      infoDiv.innerHTML = `🎵 Video: ${data.video_id}`;
+    } else {
+      infoDiv.innerHTML = '⏸️ No music playing';
+    }
+  } catch (err) {
+    console.error('Error loading music info:', err);
+  }
+}
+</script>
+
+<style>
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+  }
+  .scrollbar-track-white\/5::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  .scrollbar-thumb-primary\/30::-webkit-scrollbar-thumb {
+    background: rgba(0, 217, 255, 0.3);
+    border-radius: 4px;
+  }
+  .scrollbar-thumb-primary\/30::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 217, 255, 0.5);
+  }
+  
+  /* Line clamp */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>
+
+</body>
+</html>
