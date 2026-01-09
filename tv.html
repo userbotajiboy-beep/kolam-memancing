@@ -40,20 +40,6 @@
   }
 </script>
 <style>
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  .animate-slide-in {
-    animation: slideIn 0.5s ease forwards;
-  }
-
   /* Shining effect for top 3 - optimized */
   @keyframes shine {
     0%, 100% { background-position: -100% center; }
@@ -504,7 +490,7 @@
         const isLongName = p.name.length > 15;
         
         return `
-          <div class="${shineClass} p-6 rounded-2xl flex items-center gap-5 border-2 hover:scale-105 transition-all duration-300" style="animation: slideIn 0.5s ease ${i * 0.1}s forwards; opacity: 0;">
+          <div class="${shineClass} p-6 rounded-2xl flex items-center gap-5 border-2 transition-all duration-300">
             <div class="text-6xl min-w-[70px]">${medals[i] || '🎣'}</div>
             <div class="flex-1 ${isLongName ? 'scroll-container' : ''}">
               <div class="text-4xl font-bold mb-2 text-white drop-shadow-lg ${isLongName ? 'scroll-text' : ''}">${isLongName ? p.name + ' • ' + p.name : p.name}</div>
