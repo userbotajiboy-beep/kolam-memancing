@@ -2,7 +2,7 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1920, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TV Kolam Memancing</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -126,8 +126,6 @@
       url('tes.jpg') center/cover no-repeat fixed;
     background-size: 400% 400%, cover;
     animation: gradientShift 15s ease infinite;
-    min-width: 1920px;
-    min-height: 1080px;
   }
 
   @keyframes gradientShift {
@@ -162,11 +160,11 @@
 <body class="text-white overflow-hidden">
 
 <!-- SLIDE 1: Leaderboard + Music Player -->
-<div id="slide1" class="slide active h-screen p-8">
-  <div class="grid grid-cols-[2.5fr_1fr] gap-8 h-full">
+<div id="slide1" class="slide active h-screen p-5">
+  <div class="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-5 h-full">
 
     <!-- LEADERBOARD -->
-    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-12 border border-purple-500/30 shadow-2xl">
+    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-10 border border-purple-500/30 shadow-2xl">
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-6xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
           🏆 LEADERBOARD
@@ -182,28 +180,21 @@
     </div>
 
     <!-- MUSIC PLAYER -->
-    <div class="flex flex-col gap-6">
-      <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-8 border border-purple-500/30 shadow-2xl">
-        <h3 class="text-2xl font-semibold text-yellow-400 mb-5">🎵 NOW PLAYING</h3>
+    <div class="flex flex-col gap-5">
+      <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-6 border border-purple-500/30 shadow-2xl">
+        <h3 class="text-xl font-semibold text-yellow-400 mb-4">🎵 NOW PLAYING</h3>
         
-        <button 
-          id="startBtn" 
-          onclick="startPlayer()"
-          class="w-full bg-gradient-to-r from-purple-600 to-yellow-500 text-white font-semibold py-5 px-10 rounded-xl shadow-lg hover:shadow-purple-500/50 hover:-translate-y-0.5 transition-all duration-300 mb-5 text-lg">
-          ▶️ START MUSIC
-        </button>
-        
-        <div id="player" class="rounded-2xl overflow-hidden shadow-xl border-2 border-purple-500/50 mb-5"></div>
+        <div id="player" class="rounded-2xl overflow-hidden shadow-xl border-2 border-purple-500/50 mb-4"></div>
         
         <!-- TikTok Follow Section -->
-        <div class="bg-purple-900/50 rounded-xl p-5 text-center border border-purple-500/30 mb-5">
-          <div class="text-base opacity-70">Follow us on TikTok</div>
-          <div class="text-2xl font-bold text-yellow-400">@kolam.udang.lahhh</div>
+        <div class="bg-purple-900/50 rounded-xl p-4 text-center border border-purple-500/30 mb-4">
+          <div class="text-sm opacity-70">Follow us on TikTok</div>
+          <div class="text-xl font-bold text-yellow-400">@kolam.udang.lahhh</div>
         </div>
         
         <!-- Logo Outside -->
         <div class="flex justify-center">
-          <img src="logo.png" alt="Logo" class="h-32 w-32 object-contain">
+          <img src="logo.png" alt="Logo" class="h-28 w-28 object-contain">
         </div>
         
         <p class="text-xs text-center opacity-50 mt-3"></p>
@@ -214,23 +205,23 @@
 </div>
 
 <!-- SLIDE 2: Fullscreen Music Player -->
-<div id="slide2" class="slide h-screen p-8">
+<div id="slide2" class="slide h-screen p-5">
   <div class="h-full flex flex-col items-center justify-center">
-    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-12 border border-purple-500/30 shadow-2xl max-w-7xl w-full">
-      <h1 class="text-6xl font-bold text-center bg-gradient-to-r from-yellow-400 via-purple-400 to-yellow-400 bg-clip-text text-transparent mb-10">
+    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-10 border border-purple-500/30 shadow-2xl max-w-6xl w-full">
+      <h1 class="text-5xl font-bold text-center bg-gradient-to-r from-yellow-400 via-purple-400 to-yellow-400 bg-clip-text text-transparent mb-8">
         🎵 NOW PLAYING
       </h1>
-      <div id="playerFullscreen" class="rounded-2xl overflow-hidden shadow-2xl border-2 border-purple-500/50 mb-8" style="height: 700px;"></div>
+      <div id="playerFullscreen" class="rounded-2xl overflow-hidden shadow-2xl border-2 border-purple-500/50 mb-6" style="height: 600px;"></div>
       
       <!-- TikTok Follow Section (Fullscreen) -->
-      <div class="bg-purple-900/50 rounded-xl p-8 text-center border border-purple-500/30 mb-8">
-        <div class="text-xl opacity-70">Follow us on TikTok</div>
-        <div class="text-4xl font-bold text-yellow-400">@kolam.udang.lahhh</div>
+      <div class="bg-purple-900/50 rounded-xl p-6 text-center border border-purple-500/30 mb-6">
+        <div class="text-lg opacity-70">Follow us on TikTok</div>
+        <div class="text-3xl font-bold text-yellow-400">@kolam.udang.lahhh</div>
       </div>
       
       <!-- Logo Outside (Fullscreen) -->
       <div class="flex justify-center">
-        <img src="logo.png" alt="Logo" class="h-40 w-40 object-contain">
+        <img src="logo.png" alt="Logo" class="h-32 w-32 object-contain">
       </div>
     </div>
   </div>
@@ -364,7 +355,6 @@
       playerFullscreen.mute();
       playerFullscreen.playVideo();
       
-      document.getElementById('startBtn').classList.add('hidden');
       hasStarted = true;
       
       // Start slideshow after user interaction
@@ -418,15 +408,15 @@
 
   function createPlayers(playlistMode, initialVideo, playlistId) {
     const playerConfig = {
-      height: '280',
+      height: '240',
       width: '100%',
       playerVars: {
-        'autoplay': 0,
+        'autoplay': 1,
         'controls': 1,
         'rel': 0,
         'modestbranding': 1,
         'fs': 1,
-        'mute': 0
+        'mute': 1
       },
       events: {
         'onReady': onPlayerReady,
@@ -436,15 +426,15 @@
     };
 
     const playerConfigFullscreen = {
-      height: '700',
+      height: '600',
       width: '100%',
       playerVars: {
-        'autoplay': 0,
+        'autoplay': 1,
         'controls': 1,
         'rel': 0,
         'modestbranding': 1,
         'fs': 1,
-        'mute': 0
+        'mute': 1
       },
       events: {
         'onReady': onPlayerFullscreenReady,
@@ -474,10 +464,28 @@
   function onPlayerReady(event) {
     isPlayerReady = true;
     console.log("✅ Player ready!");
+    
+    // Auto-start with mute, then unmute after 1 second
+    setTimeout(() => {
+      player.playVideo();
+      setTimeout(() => {
+        player.unMute();
+        player.setVolume(100);
+        hasStarted = true;
+        startSlideshow();
+        console.log("🎬 Auto-started with audio!");
+      }, 1000);
+    }, 500);
   }
 
   function onPlayerFullscreenReady(event) {
     console.log("✅ Fullscreen player ready!");
+    
+    // Auto-start fullscreen player muted
+    setTimeout(() => {
+      playerFullscreen.playVideo();
+      playerFullscreen.mute();
+    }, 500);
   }
 
   function onPlayerError(event) {
