@@ -115,6 +115,21 @@
         </button>
       </div>
 
+      <div class="border-t border-white/10 pt-4 mb-4">
+        <label class="block mb-2 text-sm opacity-80">Manual Playlist (Custom Queue)</label>
+        <textarea 
+          id="manualPlaylist" 
+          rows="3"
+          placeholder="Paste video IDs or links, one per line:&#10;dQw4w9WgXcQ&#10;jNQXAC9IVRw&#10;https://youtube.com/watch?v=abc123"
+          class="w-full px-5 py-3.5 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-primary focus:bg-white/10 transition-all mb-3 font-mono text-sm"></textarea>
+        
+        <button 
+          onclick="playManualPlaylist()"
+          class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-green-500/40 hover:-translate-y-0.5 transition-all duration-300">
+          ▶ PLAY CUSTOM QUEUE
+        </button>
+      </div>
+
       <!-- Playlist Controls -->
       <div class="border-t border-white/10 pt-4 mb-4">
         <label class="block mb-3 text-sm opacity-80">Kawalan Playback</label>
@@ -257,6 +272,7 @@ async function playPlaylist() {
         playlist_id: playlistId,
         playlist_mode: true,
         video_id: null,
+        manual_playlist: null,
         updated_at: new Date().toISOString()
       })
       .eq('id', 1);
@@ -265,6 +281,59 @@ async function playPlaylist() {
 
     alert('🎵 Playlist ditukar! Playlist ID: ' + playlistId);
     document.getElementById('playlistLink').value = '';
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// Play manual playlist (custom queue)
+async function playManualPlaylist() {
+  const input = document.getElementById('manualPlaylist').value.trim();
+  
+  if (!input) {
+    alert('Sila masukkan video IDs atau links');
+    return;
+  }
+
+  // Parse input - extract video IDs
+  const lines = input.split('\n').filter(l => l.trim());
+  const videoIds = lines.map(line => {
+    line = line.trim();
+    
+    // If it's a full URL
+    if (line.includes('youtube.com') || line.includes('youtu.be')) {
+      if (line.includes('v=')) {
+        return line.split('v=')[1].substring(0, 11);
+      } else if (line.includes('youtu.be/')) {
+        return line.split('youtu.be/')[1].substring(0, 11);
+      }
+    }
+    
+    // Assume it's already a video ID
+    return line.substring(0, 11);
+  }).filter(id => id && id.length === 11);
+
+  if (videoIds.length === 0) {
+    alert('Tiada video ID yang sah dijumpai');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('music_control')
+      .update({
+        manual_playlist: videoIds,
+        playlist_mode: false,
+        playlist_id: null,
+        video_id: videoIds[0], // Start with first video
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    alert(`✅ Custom queue created! ${videoIds.length} videos added.`);
+    document.getElementById('manualPlaylist').value = '';
   } catch (err) {
     alert('❌ Error: ' + err.message);
   }
