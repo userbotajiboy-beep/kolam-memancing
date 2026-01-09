@@ -2,7 +2,7 @@
 <html lang="ms">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=1920, initial-scale=1.0, user-scalable=no">
 <title>TV Kolam Memancing</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -126,7 +126,22 @@
       url('tes.jpg') center/cover no-repeat fixed;
     background-size: 400% 400%, cover;
     animation: gradientShift 15s ease infinite;
-    min-width: 1280px;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Container wrapper for scaling */
+  .tv-container {
+    width: 1920px;
+    height: 1080px;
+    transform-origin: top left;
+  }
+  
+  @media screen and (max-width: 1920px) {
+    .tv-container {
+      transform: scale(calc(100vw / 1920));
+    }
   }
 
   @keyframes gradientShift {
@@ -159,6 +174,8 @@
 </head>
 
 <body class="text-white overflow-hidden">
+
+<div class="tv-container">
 
 <!-- SLIDE 1: Leaderboard + Music Player -->
 <div id="slide1" class="slide active h-screen p-5">
@@ -745,6 +762,8 @@
   console.log("📺 TV Page loaded");
   console.log("🔗 Connected to Supabase");
 </script>
+
+</div><!-- End tv-container -->
 
 </body>
 </html>
