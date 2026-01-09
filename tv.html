@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920, initial-scale=1.0, user-scalable=no">
 <title>TV Kolam Memancing</title>
+<link rel="preconnect" href="https://cdn.tailwindcss.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://www.youtube.com">
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -68,14 +71,10 @@
     to { opacity: 1; }
   }
 
-  /* Shining effect for top 3 */
+  /* Shining effect for top 3 - optimized */
   @keyframes shine {
-    0% {
-      background-position: -200% center;
-    }
-    100% {
-      background-position: 200% center;
-    }
+    0%, 100% { background-position: -100% center; }
+    50% { background-position: 100% center; }
   }
 
   .shine-gold {
@@ -86,9 +85,9 @@
       rgba(251, 191, 36, 0.3) 100%
     );
     background-size: 200% auto;
-    animation: shine 3s linear infinite;
+    animation: shine 4s ease-in-out infinite;
     border: 2px solid #fbbf24;
-    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
   }
 
   .shine-silver {
@@ -99,10 +98,10 @@
       rgba(203, 213, 225, 0.3) 100%
     );
     background-size: 200% auto;
-    animation: shine 3s linear infinite;
+    animation: shine 4s ease-in-out infinite;
     animation-delay: 0.5s;
     border: 2px solid #cbd5e1;
-    box-shadow: 0 0 30px rgba(203, 213, 225, 0.5);
+    box-shadow: 0 0 20px rgba(203, 213, 225, 0.4);
   }
 
   .shine-bronze {
@@ -113,41 +112,47 @@
       rgba(217, 119, 6, 0.3) 100%
     );
     background-size: 200% auto;
-    animation: shine 3s linear infinite;
+    animation: shine 4s ease-in-out infinite;
     animation-delay: 1s;
     border: 2px solid #d97706;
-    box-shadow: 0 0 30px rgba(217, 119, 6, 0.5);
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.4);
   }
 
-  /* Gradient background with image overlay */
+  /* Gradient background with image overlay - optimized */
   body {
     background: 
       linear-gradient(135deg, rgba(30, 27, 75, 0.85) 0%, rgba(88, 28, 135, 0.85) 50%, rgba(30, 27, 75, 0.85) 100%),
       url('tes.jpg') center/cover no-repeat fixed;
     background-size: 400% 400%, cover;
-    animation: gradientShift 15s ease infinite;
+    animation: gradientShift 20s ease infinite;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
   }
   
-  /* Container wrapper for scaling */
+  /* Container wrapper for scaling - optimized for TV */
   .tv-container {
     width: 1920px;
     height: 1080px;
     transform-origin: top left;
+    transform: scale(0.95); /* Default scale down 5% for better fit */
   }
   
   @media screen and (max-width: 1920px) {
     .tv-container {
-      transform: scale(calc(100vw / 1920));
+      transform: scale(calc(100vw / 1920 * 0.95));
+    }
+  }
+  
+  @media screen and (min-width: 1921px) {
+    .tv-container {
+      transform: scale(calc(100vw / 1920 * 0.9));
     }
   }
 
   @keyframes gradientShift {
-    0% { background-position: 0% 50%, center; }
+    0%, 100% { background-position: 0% 50%, center; }
     50% { background-position: 100% 50%, center; }
-    100% { background-position: 0% 50%, center; }
   }
 
   /* Auto-scrolling text for long names */
@@ -265,7 +270,7 @@
     }, 30000); // 30 seconds per slide
   }
 
-  // Keep both players in sync (background sync every 2 seconds)
+  // Keep both players in sync (background sync every 3 seconds - optimized)
   setInterval(() => {
     if (!hasStarted || !player || !playerFullscreen) return;
     
@@ -283,15 +288,15 @@
         inactivePlayer.playVideo();
       }
       
-      // Sync position if drift is more than 2 seconds
+      // Sync position if drift is more than 3 seconds
       const timeDiff = Math.abs(activePlayer.getCurrentTime() - inactivePlayer.getCurrentTime());
-      if (timeDiff > 2 && activeState === 1) {
+      if (timeDiff > 3 && activeState === 1) {
         inactivePlayer.seekTo(activePlayer.getCurrentTime(), true);
       }
     } catch(e) {
       // Ignore sync errors
     }
-  }, 2000);
+  }, 3000);
 
   function showSlide(slideNum) {
     document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
@@ -551,7 +556,7 @@
     setTimeout(initRealtimeSubscription, 1000);
   });
 
-  // Poll for updates (fallback if realtime doesn't work)
+  // Poll for updates (fallback if realtime doesn't work) - optimized interval
   let lastRefreshCheck = null;
   
   setInterval(async () => {
@@ -595,7 +600,7 @@
     } catch (err) {
       console.error('Error fetching music control:', err);
     }
-  }, 1000); // Check every 1 second for faster response
+  }, 2000); // Check every 2 seconds (was 1 second)
 
   async function handleMusicUpdate(data) {
     if (!data || !isPlayerReady || !player || !playerFullscreen) return;
@@ -747,12 +752,12 @@
     }
   }
 
-  // Load leaderboard on start and refresh every 5 seconds
+  // Load leaderboard on start and refresh every 10 seconds (optimized)
   window.addEventListener('load', () => {
     setTimeout(() => {
       if (supabaseClient) {
         loadLeaderboard();
-        setInterval(loadLeaderboard, 5000);
+        setInterval(loadLeaderboard, 10000);
       } else {
         console.error('❌ Supabase not initialized');
       }
