@@ -53,23 +53,6 @@
   .animate-slide-in {
     animation: slideIn 0.5s ease forwards;
   }
-  
-  .slide {
-    display: none;
-  }
-  
-  .slide.active {
-    display: block;
-  }
-  
-  .fade-transition {
-    animation: fadeIn 0.5s ease-in;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
 
   /* Shining effect for top 3 - optimized */
   @keyframes shine {
@@ -182,8 +165,8 @@
 
 <div class="tv-container">
 
-<!-- SLIDE 1: Leaderboard + Music Player -->
-<div id="slide1" class="slide active h-screen p-5">
+<!-- Leaderboard + Music Player -->
+<div id="mainView" class="h-screen p-5">
   <div class="grid grid-cols-[2.5fr_1fr] gap-5 h-full">
 
     <!-- LEADERBOARD -->
@@ -227,165 +210,14 @@
   </div>
 </div>
 
-<!-- SLIDE 2: Fullscreen Music Player -->
-<div id="slide2" class="slide h-screen p-5">
-  <div class="h-full flex flex-col items-center justify-center">
-    <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-8 border border-purple-500/30 shadow-2xl w-full max-w-5xl">
-      <h1 class="text-4xl font-bold text-center bg-gradient-to-r from-yellow-400 via-purple-400 to-yellow-400 bg-clip-text text-transparent mb-6">
-        🎵 NOW PLAYING
-      </h1>
-      <div id="playerFullscreen" class="rounded-2xl overflow-hidden shadow-2xl border-2 border-purple-500/50 mb-5" style="height: 500px;"></div>
-      
-      <!-- TikTok Follow Section (Fullscreen) -->
-      <div class="bg-purple-900/50 rounded-xl p-5 text-center border border-purple-500/30 mb-5">
-        <div class="text-base opacity-70">Follow us on TikTok</div>
-        <div class="text-2xl font-bold text-yellow-400">@kolam.udang.lahhh</div>
-      </div>
-      
-      <!-- Logo Outside (Fullscreen) -->
-      <div class="flex justify-center">
-        <img src="logo.png" alt="Logo" class="h-28 w-28 object-contain">
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- Load YouTube IFrame API -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
   let player;
-  let playerFullscreen;
   let currentVideo = "";
   let isPlayerReady = false;
   let hasStarted = false;
-  let currentSlide = 1;
-  let slideInterval;
-
-  // Slideshow rotation
-  function startSlideshow() {
-    slideInterval = setInterval(() => {
-      currentSlide = currentSlide === 1 ? 2 : 1;
-      showSlide(currentSlide);
-    }, 30000); // 30 seconds per slide
-  }
-
-  // Keep both players in sync (background sync every 3 seconds - optimized)
-  setInterval(() => {
-    if (!hasStarted || !player || !playerFullscreen) return;
-    
-    try {
-      const activePlayer = currentSlide === 1 ? player : playerFullscreen;
-      const inactivePlayer = currentSlide === 1 ? playerFullscreen : player;
-      
-      const activeState = activePlayer.getPlayerState();
-      const inactiveState = inactivePlayer.getPlayerState();
-      
-      // If active is playing, make sure inactive is also playing (but muted)
-      if (activeState === 1 && inactiveState !== 1) {
-        const currentTime = activePlayer.getCurrentTime();
-        inactivePlayer.seekTo(currentTime, true);
-        inactivePlayer.playVideo();
-      }
-      
-      // Sync position if drift is more than 3 seconds
-      const timeDiff = Math.abs(activePlayer.getCurrentTime() - inactivePlayer.getCurrentTime());
-      if (timeDiff > 3 && activeState === 1) {
-        inactivePlayer.seekTo(activePlayer.getCurrentTime(), true);
-      }
-    } catch(e) {
-      // Ignore sync errors
-    }
-  }, 3000);
-
-  function showSlide(slideNum) {
-    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-    const slide = document.getElementById('slide' + slideNum);
-    slide.classList.add('active');
-    slide.classList.add('fade-transition');
-    
-    // Switch audio between players without stopping playback
-    if (slideNum === 1) {
-      // Switching to Slide 1 - small player active
-      if (player && playerFullscreen && hasStarted) {
-        try {
-          // Get current position from fullscreen player
-          const currentTime = playerFullscreen.getCurrentTime();
-          const playerState = playerFullscreen.getPlayerState();
-          
-          // Sync position to small player
-          player.seekTo(currentTime, true);
-          
-          // Ensure small player is playing
-          setTimeout(() => {
-            player.unMute();
-            player.setVolume(100);
-            if (playerState === 1) { // If fullscreen was playing
-              player.playVideo();
-            }
-          }, 100);
-          
-          // Mute fullscreen but keep playing
-          playerFullscreen.mute();
-          if (playerState === 1) {
-            playerFullscreen.playVideo();
-          }
-        } catch(e) {
-          console.log('Sync error:', e);
-        }
-      }
-    } else {
-      // Switching to Slide 2 - fullscreen player active
-      if (player && playerFullscreen && hasStarted) {
-        try {
-          // Get current position from small player
-          const currentTime = player.getCurrentTime();
-          const playerState = player.getPlayerState();
-          
-          // Sync position to fullscreen player
-          playerFullscreen.seekTo(currentTime, true);
-          
-          // Ensure fullscreen player is playing
-          setTimeout(() => {
-            playerFullscreen.unMute();
-            playerFullscreen.setVolume(100);
-            if (playerState === 1) { // If small was playing
-              playerFullscreen.playVideo();
-            }
-          }, 100);
-          
-          // Mute small but keep playing
-          player.mute();
-          if (playerState === 1) {
-            player.playVideo();
-          }
-        } catch(e) {
-          console.log('Sync error:', e);
-        }
-      }
-    }
-    
-    console.log('📺 Showing slide ' + slideNum);
-  }
-
-  function startPlayer() {
-    if (player && playerFullscreen && isPlayerReady) {
-      // Start both players
-      player.unMute();
-      player.playVideo();
-      
-      // Start fullscreen player muted (will unmute when slide 2 shows)
-      playerFullscreen.mute();
-      playerFullscreen.playVideo();
-      
-      hasStarted = true;
-      
-      // Start slideshow after user interaction
-      startSlideshow();
-      
-      console.log("🎬 Both players started!");
-    }
-  }
 
   // YouTube API ready callback
   function onYouTubeIframeAPIReady() {
@@ -448,40 +280,18 @@
       }
     };
 
-    const playerConfigFullscreen = {
-      height: '500',
-      width: '100%',
-      playerVars: {
-        'autoplay': 1,
-        'controls': 1,
-        'rel': 0,
-        'modestbranding': 1,
-        'fs': 1,
-        'mute': 1
-      },
-      events: {
-        'onReady': onPlayerFullscreenReady,
-        'onError': onPlayerError,
-        'onStateChange': onPlayerStateChange
-      }
-    };
-
     // Load playlist or single video
     if (playlistMode && playlistId) {
       playerConfig.playerVars.listType = 'playlist';
       playerConfig.playerVars.list = playlistId;
-      playerConfigFullscreen.playerVars.listType = 'playlist';
-      playerConfigFullscreen.playerVars.list = playlistId;
       console.log("🎵 Loading playlist: " + playlistId);
     } else {
       playerConfig.videoId = initialVideo;
-      playerConfigFullscreen.videoId = initialVideo;
       currentVideo = initialVideo;
       console.log("🎵 Loading video: " + initialVideo);
     }
     
     player = new YT.Player('player', playerConfig);
-    playerFullscreen = new YT.Player('playerFullscreen', playerConfigFullscreen);
   }
 
   function onPlayerReady(event) {
@@ -495,19 +305,8 @@
         player.unMute();
         player.setVolume(100);
         hasStarted = true;
-        startSlideshow();
         console.log("🎬 Auto-started with audio!");
       }, 1000);
-    }, 500);
-  }
-
-  function onPlayerFullscreenReady(event) {
-    console.log("✅ Fullscreen player ready!");
-    
-    // Auto-start fullscreen player muted
-    setTimeout(() => {
-      playerFullscreen.playVideo();
-      playerFullscreen.mute();
     }, 500);
   }
 
@@ -603,7 +402,7 @@
   }, 2000); // Check every 2 seconds (was 1 second)
 
   async function handleMusicUpdate(data) {
-    if (!data || !isPlayerReady || !player || !playerFullscreen) return;
+    if (!data || !isPlayerReady || !player) return;
 
     // Handle TV refresh command
     if (data.refresh_tv === true) {
@@ -620,19 +419,15 @@
       switch(data.command) {
         case 'play':
           player.playVideo();
-          playerFullscreen.playVideo();
           break;
         case 'pause':
           player.pauseVideo();
-          playerFullscreen.pauseVideo();
           break;
         case 'next':
           player.nextVideo();
-          playerFullscreen.nextVideo();
           break;
         case 'previous':
           player.previousVideo();
-          playerFullscreen.previousVideo();
           break;
       }
     }
@@ -644,50 +439,23 @@
       if (data.playlist_mode && data.playlist_id) {
         console.log("🔄 Loading playlist: " + data.playlist_id);
         
-        // Load playlist on both players
         player.loadPlaylist({
           listType: 'playlist',
           list: data.playlist_id,
           index: 0
         });
         
-        playerFullscreen.loadPlaylist({
-          listType: 'playlist',
-          list: data.playlist_id,
-          index: 0
-        });
-        
         if (hasStarted) {
-          setTimeout(() => {
-            player.playVideo();
-            playerFullscreen.playVideo();
-            // Mute the inactive one
-            if (currentSlide === 1) {
-              playerFullscreen.mute();
-            } else {
-              player.mute();
-            }
-          }, 500);
+          setTimeout(() => player.playVideo(), 500);
         }
       } else if (!data.playlist_mode && data.video_id && data.video_id !== currentVideo) {
         console.log("🔄 Loading video: " + data.video_id);
         currentVideo = data.video_id;
         
-        // Load video on both players
         player.loadVideoById(data.video_id);
-        playerFullscreen.loadVideoById(data.video_id);
         
         if (hasStarted) {
-          setTimeout(() => {
-            player.playVideo();
-            playerFullscreen.playVideo();
-            // Mute the inactive one
-            if (currentSlide === 1) {
-              playerFullscreen.mute();
-            } else {
-              player.mute();
-            }
-          }, 500);
+          setTimeout(() => player.playVideo(), 500);
         }
       }
     }
