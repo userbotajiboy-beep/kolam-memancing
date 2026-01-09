@@ -24,6 +24,7 @@ CREATE TABLE music_control (
   playlist_id TEXT,
   playlist_mode BOOLEAN DEFAULT false,
   command TEXT,
+  refresh_tv BOOLEAN DEFAULT false,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

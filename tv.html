@@ -165,9 +165,15 @@
 
     <!-- LEADERBOARD -->
     <div class="bg-purple-900/30 backdrop-blur-lg rounded-3xl p-10 border border-purple-500/30 shadow-2xl">
-      <h1 class="text-6xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent mb-8">
-        🏆 LEADERBOARD
-      </h1>
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-6xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+          🏆 LEADERBOARD
+        </h1>
+        <div class="text-right">
+          <div class="text-xs opacity-50">Last Updated</div>
+          <div id="lastUpdate" class="text-sm font-semibold text-yellow-400">--:--</div>
+        </div>
+      </div>
       <div id="leaderboard" class="flex flex-col gap-4">
         <div class="text-center py-10 opacity-60">Memuat data...</div>
       </div>
@@ -195,7 +201,7 @@
         
         <!-- Logo Outside -->
         <div class="flex justify-center">
-          <img src="logo.png" alt="Logo" class="h-20 w-20 object-contain rounded-lg shadow-2xl border-2 border-yellow-400/50">
+          <img src="logo.png" alt="Logo" class="h-28 w-28 object-contain">
         </div>
         
         <p class="text-xs text-center opacity-50 mt-3"></p>
@@ -222,7 +228,7 @@
       
       <!-- Logo Outside (Fullscreen) -->
       <div class="flex justify-center">
-        <img src="logo.png" alt="Logo" class="h-24 w-24 object-contain rounded-lg shadow-2xl border-2 border-yellow-400/50">
+        <img src="logo.png" alt="Logo" class="h-32 w-32 object-contain">
       </div>
     </div>
   </div>
@@ -483,6 +489,8 @@
   });
 
   // Poll for updates (fallback if realtime doesn't work)
+  let lastRefreshCheck = null;
+  
   setInterval(async () => {
     try {
       const { data, error } = await supabaseClient
@@ -492,14 +500,50 @@
         .single();
 
       if (error) throw error;
+      
+      // Check for refresh command FIRST (with timestamp to avoid loops)
+      if (data && data.refresh_tv === true) {
+        const currentCheck = data.updated_at;
+        if (currentCheck !== lastRefreshCheck) {
+          lastRefreshCheck = currentCheck;
+          console.log('🔄 Hard refresh command detected, clearing cache and reloading...');
+          
+          // Clear all caches
+          if ('caches' in window) {
+            caches.keys().then(names => {
+              names.forEach(name => caches.delete(name));
+            });
+          }
+          
+          // Clear localStorage (except Supabase config)
+          const supabaseUrl = localStorage.getItem('supabase.auth.token');
+          localStorage.clear();
+          if (supabaseUrl) localStorage.setItem('supabase.auth.token', supabaseUrl);
+          
+          // Hard reload with cache bypass
+          setTimeout(() => {
+            window.location.href = window.location.href + '?t=' + Date.now();
+          }, 500);
+          return;
+        }
+      }
+      
       if (data) handleMusicUpdate(data);
     } catch (err) {
       console.error('Error fetching music control:', err);
     }
-  }, 2000);
+  }, 1000); // Check every 1 second for faster response
 
   async function handleMusicUpdate(data) {
     if (!data || !isPlayerReady || !player) return;
+
+    // Handle TV refresh command
+    if (data.refresh_tv === true) {
+      console.log('🔄 Refresh command received, reloading page...');
+      // Hard reload with cache clear
+      window.location.reload(true);
+      return;
+    }
 
     // Handle commands
     if (data.command && data.updated_at !== lastMusicUpdate) {
@@ -637,6 +681,12 @@
       }
       
       console.log('✅ Loaded ' + players.length + ' players');
+      
+      // Update timestamp
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('ms-MY', { day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('ms-MY', { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('lastUpdate').textContent = `${dateStr} ${timeStr}`;
       
       const medals = ['🥇', '🥈', '🥉'];
       const shineClasses = ['shine-gold', 'shine-silver', 'shine-bronze'];

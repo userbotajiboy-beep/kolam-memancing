@@ -116,7 +116,7 @@
       </div>
 
       <!-- Playlist Controls -->
-      <div class="border-t border-white/10 pt-4">
+      <div class="border-t border-white/10 pt-4 mb-4">
         <label class="block mb-3 text-sm opacity-80">Kawalan Playback</label>
         <div class="grid grid-cols-2 gap-2">
           <button 
@@ -140,6 +140,16 @@
             ▶️ Play
           </button>
         </div>
+      </div>
+
+      <!-- TV Remote Control -->
+      <div class="border-t border-white/10 pt-4">
+        <label class="block mb-3 text-sm opacity-80">Kawalan TV Screen</label>
+        <button 
+          onclick="refreshTV()"
+          class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold py-3 px-4 rounded-lg hover:shadow-orange-500/40 transition-all">
+          🔄 REFRESH TV (Clear Cache)
+        </button>
       </div>
 
       <p class="text-xs opacity-60 mt-3 leading-relaxed">
@@ -276,6 +286,35 @@ async function sendCommand(command) {
     console.log('📤 Command sent: ' + command);
   } catch (err) {
     console.error('Error sending command:', err);
+  }
+}
+
+// Refresh TV screen remotely
+async function refreshTV() {
+  if (!confirm('Refresh TV screen? Ini akan reload page TV dan clear cache.')) return;
+  
+  try {
+    const { error } = await supabaseClient
+      .from('music_control')
+      .update({
+        refresh_tv: true,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1);
+
+    if (error) throw error;
+
+    alert('✅ TV refresh command sent! TV akan reload dalam beberapa saat.');
+    
+    // Reset flag after 2 seconds
+    setTimeout(async () => {
+      await supabaseClient
+        .from('music_control')
+        .update({ refresh_tv: false })
+        .eq('id', 1);
+    }, 2000);
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
   }
 }
 
